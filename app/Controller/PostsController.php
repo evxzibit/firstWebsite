@@ -3,8 +3,23 @@ class PostsController extends AppController {
 	public $helpers = array('Html', 'Form', 'Session');
 	public $components = array('Session');
 	
+	public function isAuthorized($user) {
+		//All registered users can add posts
+		if($this->action === 'add'){
+			return true;
+		}
+		//every user can edit and delete his/her own post
+		if(in_array($this->action,array('edit', 'delete'))){
+			$postId = $this->request->params['pass'][0];
+			if ($this->Post->isOwnedBy($postId, $user['id'])) {
+				return true;
+			}
+		}
+		 return parent::isAuthorized($user);
+	}
+	
 	public function index(){
-		$this->set('allPosts', $this->Post->find('all'));
+		$this->set('allPosts', $this->paginate());
 	}
 	
 	public function view($id = null){
@@ -53,6 +68,7 @@ class PostsController extends AppController {
 	}
 	public function add(){
 		if($this->request->is('post')){
+			$this->request->data['Post']['user_id'] = $this->Auth->user('id');
 			if ($this->Post->save($this->request->data)) {
                 $this->Session->setFlash(__('Your post has been saved.'));
                 return $this->redirect(array('action' => 'index'));

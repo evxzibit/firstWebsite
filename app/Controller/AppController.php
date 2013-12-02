@@ -32,5 +32,28 @@ App::uses('Controller', 'Controller');
  * @link		http://book.cakephp.org/2.0/en/controllers.html#the-app-controller
  */
 class AppController extends Controller {
-	public $components = array('DebugKit.Toolbar');
+	public $components = array(
+			'DebugKit.Toolbar',
+			'Session',
+			'Auth' => array(
+            'loginRedirect' => array('controller' => 'posts', 'action' => 'index'),
+            'logoutRedirect' => array('controller' => 'users', 'action' => 'login'),
+			'authorize' => array('Controller') // Added this line
+			)
+		);
+	 public function beforeFilter() {
+        $this->Auth->allow('index', 'view');
+    }
+	
+	public function isAuthorized($user) {
+		// Admin can access every action
+		if (isset($user['role_id']) && $user['role_id'] === '1') {
+			return true;
+		}
+
+		// Default deny
+		$this->Session->setFlash(__('You cannot edit or delete this post'));
+		return false;
+	}
+	
 }

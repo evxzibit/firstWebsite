@@ -1,0 +1,11 @@
+{
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://redmine.octoplus.co.za/satis"
+        }
+    ],
+	"require": {
+		"octoplus/octo_auth": "v2.0.0"
+	}
+}
